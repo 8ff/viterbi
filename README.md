@@ -1,4 +1,4 @@
-# Convolutional Encoder and Viterbi Decoder
+# 📡 Convolutional Encoder and Viterbi Decoder
 
 This package implements a convolutional encoder and a Viterbi decoder.
 It can be used as a library or as a command line tool.
@@ -9,7 +9,6 @@ package main
 
 import (
 	"fmt"
-
 	"github.com/8ff/viterbi"
 )
 
@@ -62,3 +61,13 @@ echo 10000010 | go run viterbiCli.go decode 3 5 7
 # Encode/Decode
 echo 101010 | go run viterbiCli.go encode 3 5 7 | go run viterbiCli.go decode 3 5 7
 ```
+
+## Error Handling
+Inputs are validated, and proper error messages will be displayed.
+
+* The constraint should be greater than 0.
+* A generator polynomial should be greater than 0 and less than 1 << constraint.
+* The received bit sequence should be of length N * <num-of-polynomials> where N is an integer. Otherwise some bits must be missing during transmission. We will fill in appropriate number of trailing zeros.
+
+## Dependencies
+This code contains no external dependencies.
