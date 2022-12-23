@@ -293,3 +293,29 @@ func (v *ViterbiCodec) EncodeBytes(bytes []byte) string {
 func (v *ViterbiCodec) DecodeBytes(bits string) []byte {
 	return BitsToBytes(v.Decode(bits))
 }
+
+// Function that converts a string of bits to []int
+func BitsToInts(bits string) []int {
+	var ints []int
+	for _, b := range bits {
+		if b == '0' {
+			ints = append(ints, 0)
+		} else {
+			ints = append(ints, 1)
+		}
+	}
+	return ints
+}
+
+// Function that converts a []int to a string of bits.
+func IntsToBits(ints []int) string {
+	var bits string
+	for _, i := range ints {
+		if i == 0 {
+			bits += "0"
+		} else {
+			bits += "1"
+		}
+	}
+	return bits
+}
