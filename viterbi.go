@@ -293,3 +293,23 @@ func (v *ViterbiCodec) EncodeBytes(bytes []byte) string {
 func (v *ViterbiCodec) DecodeBytes(bits string) []byte {
 	return BitsToBytes(v.Decode(bits))
 }
+
+// Encode bytes using BitsToBytes and run codec.Encode then return bytes using BytesToBits or error
+func (v *ViterbiCodec) EncodeBytesToBytes(bytes []byte) ([]byte, error) {
+	bits := v.Encode(BytesToBits(bytes))
+	bytesToReturn := BitsToBytes(bits)
+	if bytesToReturn == nil {
+		return nil, fmt.Errorf("could not convert bits to bytes")
+	}
+	return bytesToReturn, nil
+}
+
+// Decode bytes using BytesToBits and run codec.Decode then return bytes using BitsToBytes or error
+func (v *ViterbiCodec) DecodeBytesToBytes(bytes []byte) ([]byte, error) {
+	bits := BytesToBits(bytes)
+	bytesToReturn := BitsToBytes(v.Decode(bits))
+	if bytesToReturn == nil {
+		return nil, fmt.Errorf("could not convert bits to bytes")
+	}
+	return bytesToReturn, nil
+}
