@@ -1,3 +1,4 @@
+![logo](media/logo.svg)
 # 📡 Convolutional Encoder and Viterbi Decoder
 
 This package implements a convolutional encoder and a Viterbi decoder.
