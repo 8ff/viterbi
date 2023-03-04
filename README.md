@@ -1,5 +1,5 @@
 ![logo](media/logo.svg)
-# 📡 Convolutional Encoder and Viterbi Decoder
+# Convolutional Encoder and Viterbi Decoder
 
 This package implements a convolutional encoder and a Viterbi decoder.
 It can be used as a library or as a command line tool.
