@@ -110,3 +110,42 @@ func TestEncodeDecodeBytes(t *testing.T) {
 		t.Errorf("Expected %s, got %s", BytesToBits(inputBytes), decoded)
 	}
 }
+
+func TestSeparateEncodeDecoders(t *testing.T) {
+	// Vars
+	constraint := 7
+	polynomials := []int{91, 109, 121}
+	inputLen := 20
+	numOfCorruptBits := 1
+	reversePolynomials := false // Somehow when this is true and using different encode/decode codecs, the test fails
+
+	// Generate random input bytes
+	inputBytes := make([]byte, inputLen)
+	for i := 0; i < 6; i++ {
+		inputBytes[i] = byte(rand.Intn(256))
+	}
+
+	codec, err := Init(Input{Constraint: constraint, Polynomials: polynomials, ReversePolynomials: reversePolynomials})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Encode
+	encoded := codec.Encode(BytesToBits(inputBytes))
+
+	// Corrupt bits
+	encoded = corruptBits(encoded, numOfCorruptBits)
+
+	decodeCodec, err := Init(Input{Constraint: constraint, Polynomials: polynomials, ReversePolynomials: reversePolynomials})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Decode
+	decoded := decodeCodec.Decode(encoded)
+
+	// Check if decoded is equal to input
+	if !bytes.Equal(BitsToBytes(decoded), inputBytes) {
+		t.Errorf("Expected %s, got %s", BytesToBits(inputBytes), decoded)
+	}
+}
