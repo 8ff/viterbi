@@ -41,6 +41,7 @@ func TestEncodeDecode(t *testing.T) {
 	polynomials := []int{91, 109, 121}
 	inputLen := 20
 	numOfCorruptBits := 1
+	reversePolynomials := false
 
 	// Generate random input bytes
 	inputBytes := make([]byte, inputLen)
@@ -48,7 +49,7 @@ func TestEncodeDecode(t *testing.T) {
 		inputBytes[i] = byte(rand.Intn(256))
 	}
 
-	codec, err := Init(Input{Constraint: constraint, Polynomials: polynomials, ReversePolynomials: false})
+	codec, err := Init(Input{Constraint: constraint, Polynomials: polynomials, ReversePolynomials: reversePolynomials})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -82,6 +83,7 @@ func TestEncodeDecodeBytes(t *testing.T) {
 	polynomials := []int{91, 109, 121}
 	inputLen := 20
 	numOfCorruptBits := 1
+	reversePolynomials := false
 
 	// Generate random input bytes
 	inputBytes := make([]byte, inputLen)
@@ -89,7 +91,7 @@ func TestEncodeDecodeBytes(t *testing.T) {
 		inputBytes[i] = byte(rand.Intn(256))
 	}
 
-	codec, err := Init(Input{Constraint: constraint, Polynomials: polynomials, ReversePolynomials: false})
+	codec, err := Init(Input{Constraint: constraint, Polynomials: polynomials, ReversePolynomials: reversePolynomials})
 	if err != nil {
 		t.Fatal(err)
 	}
