@@ -4,12 +4,18 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      releaseNote:
+        description: 'Release Note'
+        required: false
+        default: 'Manual release'
 
 env:
   TAG: latest
   RELEASE_NAME: Latest release
-  RELEASE_BODY: Latest release
-  BINARY_PREFIX: viterbiCli  # Updated to match your new project name
+  BINARY_PREFIX: viterbiCli
+  BUILD_DIR: build
 
 jobs:
   build_and_release:
@@ -28,7 +34,7 @@ jobs:
 
       - name: Build binaries
         run: |
-          mkdir -p build
+          mkdir -p ${{ env.BUILD_DIR }}
           PLATFORMS=(
             "darwin/arm64"
             "darwin/amd64"
@@ -58,8 +64,15 @@ jobs:
               OUTPUT_NAME=$OUTPUT_NAME.exe
             fi
             echo "Building for $GOOS/$GOARCH..."
-            GOOS=$GOOS GOARCH=$GOARCH go build -ldflags "-X 'main.Version=$(date +'%Y-%m-%d_%H:%M:%S')'" -o "build/$OUTPUT_NAME" ./cmd/viterbiCli
+            GOOS=$GOOS GOARCH=$GOARCH go build -ldflags "-X 'main.Version=$(date +'%Y-%m-%d_%H:%M:%S')'" -o "${{ env.BUILD_DIR }}/$OUTPUT_NAME" ./cmd/viterbiCli
           done
+
+      - name: Delete existing release
+        uses: dev-drprasad/delete-tag-and-release@v0.2.1
+        with:
+          tag_name: ${{ env.TAG }}
+          delete_release: true
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create Release
         id: create_release
@@ -69,7 +82,7 @@ jobs:
         with:
           tag_name: ${{ env.TAG }}
           release_name: ${{ env.RELEASE_NAME }}
-          body: ${{ env.RELEASE_BODY }}
+          body: ${{ github.event.inputs.releaseNote || 'Automated release' }}
           draft: false
           prerelease: false
 
@@ -82,7 +95,7 @@ jobs:
             const path = require('path');
             
             const uploadUrl = '${{ steps.create_release.outputs.upload_url }}';
-            const buildDir = 'build';
+            const buildDir = '${{ env.BUILD_DIR }}';
             
             const files = await fs.readdir(buildDir);
             for (const file of files) {
