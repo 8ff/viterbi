@@ -16,6 +16,7 @@ env:
   RELEASE_NAME: Latest release
   BINARY_PREFIX: viterbiCli
   BUILD_DIR: build
+  SOURCE_DIR: ./cmd/viterbiCli  # New environment variable for source directory
 
 jobs:
   build_and_release:
@@ -64,7 +65,7 @@ jobs:
               OUTPUT_NAME=$OUTPUT_NAME.exe
             fi
             echo "Building for $GOOS/$GOARCH..."
-            GOOS=$GOOS GOARCH=$GOARCH go build -ldflags "-X 'main.Version=$(date +'%Y-%m-%d_%H:%M:%S')'" -o "${{ env.BUILD_DIR }}/$OUTPUT_NAME" ./cmd/viterbiCli
+            GOOS=$GOOS GOARCH=$GOARCH go build -ldflags "-X 'main.Version=$(date +'%Y-%m-%d_%H:%M:%S')'" -o "${{ env.BUILD_DIR }}/$OUTPUT_NAME" ${{ env.SOURCE_DIR }}
           done
 
       - name: Delete existing release
