@@ -1,117 +1,127 @@
-name: Build and Release
-
 on:
   push:
     branches:
       - main
-  workflow_dispatch:
-    inputs:
-      releaseNote:
-        description: 'Release Note'
-        required: false
-        default: 'Manual release'
-
-env:
-  TAG: latest
-  RELEASE_NAME: Latest release
-  BINARY_PREFIX: viterbiCli
-  BUILD_DIR: build
-  SOURCE_DIR: ./cmd/viterbiCli
-
+name: Build and Release
 jobs:
   build_and_release:
     runs-on: ubuntu-latest
+    env: # Define environment variables here
+      TAG: latest
+      RELEASE_NAME: Latest release
+      RELEASE_BODY: Latest release
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      BINARY_PREFIX: viterbiCli
+      SOURCE_PATH: cmd/viterbiCli
     steps:
       - name: Checkout the repository
-        uses: actions/checkout@v3
-
+        uses: actions/checkout@v2
       - name: Set up Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v2
         with:
-          go-version: 'stable'
-
+          go-version: '*' # Use the latest stable version of Go          
       - name: Install dependencies
         run: go mod download
+      - name: Download releaseMaker
+        run: wget https://github.com/8ff/releaseMaker/releases/download/latest/releaseMaker.linux.amd64 -O /tmp/releaseMaker && chmod +x /tmp/releaseMaker
+      
+      - name: Build Darwin ARM64 binary
+        working-directory: ${{ env.SOURCE_PATH }}
+        env:
+          OS: darwin
+          ARCH: arm64
+        run: GOOS=$OS GOARCH=$ARCH go build -ldflags "-X 'main.Version=$(date +'%Y-%m-%d_%H:%M:%S')'" -o "/tmp/build/${{ env.BINARY_PREFIX }}.$OS.$ARCH"
+      
+      - name: Build Darwin AMD64 binary
+        working-directory: ${{ env.SOURCE_PATH }}
+        env:
+          OS: darwin
+          ARCH: amd64
+        run: GOOS=$OS GOARCH=$ARCH go build -ldflags "-X 'main.Version=$(date +'%Y-%m-%d_%H:%M:%S')'" -o "/tmp/build/${{ env.BINARY_PREFIX }}.$OS.$ARCH"
+      
+      - name: Build Linux ARM64 binary
+        working-directory: ${{ env.SOURCE_PATH }}
+        env:
+          OS: linux
+          ARCH: arm64
+        run: GOOS=$OS GOARCH=$ARCH go build -ldflags "-X 'main.Version=$(date +'%Y-%m-%d_%H:%M:%S')'" -o "/tmp/build/${{ env.BINARY_PREFIX }}.$OS.$ARCH"
+      
+      - name: Build Linux AMD64 binary
+        working-directory: ${{ env.SOURCE_PATH }}
+        env:
+          OS: linux
+          ARCH: amd64
+        run: GOOS=$OS GOARCH=$ARCH go build -ldflags "-X 'main.Version=$(date +'%Y-%m-%d_%H:%M:%S')'" -o "/tmp/build/${{ env.BINARY_PREFIX }}.$OS.$ARCH"
 
-      - name: Build binaries
+      - name: Build Windows AMD64 binary
+        working-directory: ${{ env.SOURCE_PATH }}
+        env:
+          OS: windows
+          ARCH: amd64
+        run: GOOS=$OS GOARCH=$ARCH go build -ldflags "-X 'main.Version=$(date +'%Y-%m-%d_%H:%M:%S')'" -o "/tmp/build/${{ env.BINARY_PREFIX }}.$OS.$ARCH.exe"
+
+      - name: Build Windows ARM64 binary
+        working-directory: ${{ env.SOURCE_PATH }}
+        env:
+          OS: windows
+          ARCH: arm64
+        run: GOOS=$OS GOARCH=$ARCH go build -ldflags "-X 'main.Version=$(date +'%Y-%m-%d_%H:%M:%S')'" -o "/tmp/build/${{ env.BINARY_PREFIX }}.$OS.$ARCH.exe"
+
+      - name: Build OpenBSD AMD64 binary
+        working-directory: ${{ env.SOURCE_PATH }}
+        env:
+          OS: openbsd
+          ARCH: amd64
+        run: GOOS=$OS GOARCH=$ARCH go build -ldflags "-X 'main.Version=$(date +'%Y-%m-%d_%H:%M:%S')'" -o "/tmp/build/${{ env.BINARY_PREFIX }}.$OS.$ARCH"
+
+      - name: Build OpenBSD ARM64 binary
+        working-directory: ${{ env.SOURCE_PATH }}
+        env:
+          OS: openbsd
+          ARCH: arm64
+        run: GOOS=$OS GOARCH=$ARCH go build -ldflags "-X 'main.Version=$(date +'%Y-%m-%d_%H:%M:%S')'" -o "/tmp/build/${{ env.BINARY_PREFIX }}.$OS.$ARCH"
+
+      - name: Build FreeBSD AMD64 binary
+        working-directory: ${{ env.SOURCE_PATH }}
+        env:
+          OS: freebsd
+          ARCH: amd64
+        run: GOOS=$OS GOARCH=$ARCH go build -ldflags "-X 'main.Version=$(date +'%Y-%m-%d_%H:%M:%S')'" -o "/tmp/build/${{ env.BINARY_PREFIX }}.$OS.$ARCH"
+
+      - name: Build FreeBSD ARM64 binary
+        working-directory: ${{ env.SOURCE_PATH }}
+        env:
+          OS: freebsd
+          ARCH: arm64
+        run: GOOS=$OS GOARCH=$ARCH go build -ldflags "-X 'main.Version=$(date +'%Y-%m-%d_%H:%M:%S')'" -o "/tmp/build/${{ env.BINARY_PREFIX }}.$OS.$ARCH"
+
+      - name: Build NetBSD AMD64 binary
+        working-directory: ${{ env.SOURCE_PATH }}
+        env:
+          OS: netbsd
+          ARCH: amd64
+        run: GOOS=$OS GOARCH=$ARCH go build -ldflags "-X 'main.Version=$(date +'%Y-%m-%d_%H:%M:%S')'" -o "/tmp/build/${{ env.BINARY_PREFIX }}.$OS.$ARCH"
+
+      - name: Build NetBSD ARM64 binary
+        working-directory: ${{ env.SOURCE_PATH }}
+        env:
+          OS: netbsd
+          ARCH: arm64
+        run: GOOS=$OS GOARCH=$ARCH go build -ldflags "-X 'main.Version=$(date +'%Y-%m-%d_%H:%M:%S')'" -o "/tmp/build/${{ env.BINARY_PREFIX }}.$OS.$ARCH"
+
+      - name: Build DragonFly BSD AMD64 binary
+        working-directory: ${{ env.SOURCE_PATH }}
+        env:
+          OS: dragonfly
+          ARCH: amd64
+        run: GOOS=$OS GOARCH=$ARCH go build -ldflags "-X 'main.Version=$(date +'%Y-%m-%d_%H:%M:%S')'" -o "/tmp/build/${{ env.BINARY_PREFIX }}.$OS.$ARCH"
+
+      - name: Replace Existing Release
+        run: /tmp/releaseMaker replace ${{ github.repository }} ${{ env.TAG }} "${{ env.RELEASE_NAME }}" "${{ env.RELEASE_BODY }}"
+
+      - name: Upload the artifacts
         run: |
-          mkdir -p ${{ env.BUILD_DIR }}
-          PLATFORMS=(
-            "darwin/arm64"
-            "darwin/amd64"
-            "linux/arm64"
-            "linux/amd64"
-            "windows/amd64"
-            "windows/arm64"
-            "freebsd/386"
-            "freebsd/amd64"
-            "freebsd/arm"
-            "freebsd/arm64"
-            "openbsd/386"
-            "openbsd/amd64"
-            "openbsd/arm"
-            "openbsd/arm64"
-            "dragonfly/amd64"
-            "netbsd/386"
-            "netbsd/amd64"
-            "netbsd/arm"
-            "netbsd/arm64"
-          )
-          for PLATFORM in "${PLATFORMS[@]}"; do
-            GOOS=${PLATFORM%/*}
-            GOARCH=${PLATFORM#*/}
-            OUTPUT_NAME=${{ env.BINARY_PREFIX }}.$GOOS.$GOARCH
-            if [ "$GOOS" = "windows" ]; then
-              OUTPUT_NAME=$OUTPUT_NAME.exe
-            fi
-            echo "Building for $GOOS/$GOARCH..."
-            GOOS=$GOOS GOARCH=$GOARCH go build -ldflags "-X 'main.Version=$(date +'%Y-%m-%d_%H:%M:%S')'" -o "${{ env.BUILD_DIR }}/$OUTPUT_NAME" ${{ env.SOURCE_DIR }}
+          cd /tmp/build
+          for file in *; do
+            /tmp/releaseMaker upload ${{ github.repository }} ${{ env.TAG }} $file $file
           done
-
-      - name: Delete existing release
-        uses: dev-drprasad/delete-tag-and-release@v0.2.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ env.TAG }}
-          delete_release: true
-
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ env.TAG }}
-          release_name: ${{ env.RELEASE_NAME }}
-          body: ${{ github.event.inputs.releaseNote || 'Automated release' }}
-          draft: false
-          prerelease: false
-
-      - name: Upload Release Assets
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const fs = require('fs').promises;
-            const path = require('path');
-            
-            const uploadUrl = '${{ steps.create_release.outputs.upload_url }}';
-            const buildDir = '${{ env.BUILD_DIR }}';
-            
-            const files = await fs.readdir(buildDir);
-            for (const file of files) {
-              const filePath = path.join(buildDir, file);
-              const stat = await fs.stat(filePath);
-              if (stat.isFile()) {
-                console.log(`Uploading ${file}...`);
-                await github.rest.repos.uploadReleaseAsset({
-                  url: uploadUrl,
-                  headers: { 'content-type': 'application/octet-stream' },
-                  name: file,
-                  data: await fs.readFile(filePath)
-                });
-              }
-            }
