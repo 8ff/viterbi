@@ -16,7 +16,7 @@ env:
   RELEASE_NAME: Latest release
   BINARY_PREFIX: viterbiCli
   BUILD_DIR: build
-  SOURCE_DIR: ./cmd/viterbiCli  # New environment variable for source directory
+  SOURCE_DIR: ./cmd/viterbiCli
 
 jobs:
   build_and_release:
@@ -70,10 +70,11 @@ jobs:
 
       - name: Delete existing release
         uses: dev-drprasad/delete-tag-and-release@v0.2.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ env.TAG }}
           delete_release: true
-          github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create Release
         id: create_release
@@ -88,9 +89,11 @@ jobs:
           prerelease: false
 
       - name: Upload Release Assets
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         uses: actions/github-script@v6
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs').promises;
             const path = require('path');
